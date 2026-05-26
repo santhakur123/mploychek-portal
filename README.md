@@ -7,7 +7,7 @@ It features an **Angular 17** frontend client and a **Node.js Express** backend 
 
 ---
 
-## 🚀 Quick Start Guide
+##  Quick Start Guide
 
 ### Prerequisites
 - **Node.js**: `v20.x` or higher (tested on `v20.15.1`)
@@ -49,7 +49,7 @@ It features an **Angular 17** frontend client and a **Node.js Express** backend 
 
 ---
 
-## 🔑 Seeding Credentials
+## The demo credentials  Seeding Credentials
 
 The local database is automatically pre-seeded with the following credentials. You can select either role on the login page:
 
@@ -61,7 +61,7 @@ The local database is automatically pre-seeded with the following credentials. Y
 
 ---
 
-## 🛠️ Key Architectural Features
+## The  Key  Features of this project
 
 ### 1. Asynchronous Delay Simulation (`?delay=x` parameter)
 To showcase the frontend loading experience:
@@ -69,7 +69,7 @@ To showcase the frontend loading experience:
 - The frontend features a global **HTTP interceptor** (`frontend/src/app/interceptors/loading.interceptor.ts`) that automatically appends `?delay=1200` to backend API requests (unless a component requests a custom delay).
 - When APIs are in-flight, the frontend displays **loading skeleton screens** and a global **glassmorphic spinner overlay** to prevent double clicks and showcase responsive asynchronous states.
 
-### 2. Role-Based Access Controls
+### 2. Role Based Access Controls
 - **JWT Authentication**: Users receive a signed JWT token on login.
 - **Route Guards**:
   - `AuthGuard`: Blocks anonymous users from accessing dashboard pages.
