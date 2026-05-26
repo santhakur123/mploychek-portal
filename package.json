@@ -1,0 +1,11 @@
+{
+  "name": "mploychek-portal",
+  "version": "1.0.0",
+  "description": "Monolith deployment wrapper for MPloyChek single-page app",
+  "scripts": {
+    "build:frontend": "cd frontend && npm install && npx ng build --configuration=production",
+    "build:backend": "cd backend && npm install",
+    "build": "npm run build:frontend && npm run build:backend",
+    "start": "cd backend && node server.js"
+  }
+}
