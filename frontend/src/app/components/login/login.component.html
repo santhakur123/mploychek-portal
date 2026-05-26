@@ -1,0 +1,105 @@
+<div class="login-wrapper">
+  <div class="login-bg-decor">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+  </div>
+
+  <div class="login-card">
+    <div class="login-header">
+      <div class="logo-badge">
+        <span class="logo-text">MP</span><span class="logo-check">✓</span>
+      </div>
+      <h1 class="login-title">MPloyChek</h1>
+      <p class="login-subtitle">Secure Digital Background Verification</p>
+    </div>
+
+    <!-- Error Alert Box -->
+    <div class="alert alert-danger" *ngIf="errorMessage" aria-live="polite">
+      <div class="alert-icon">⚠</div>
+      <div class="alert-content">{{ errorMessage }}</div>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      
+      <!-- Role Segmented Tab Selector -->
+      <div class="form-group role-selector-group">
+        <label class="form-label">System Access Role</label>
+        <div class="segmented-control">
+          <input type="radio" id="role-user" value="General User" formControlName="role" checked>
+          <label for="role-user" class="segment-label">
+            <span class="label-icon">👤</span> General User
+          </label>
+
+          <input type="radio" id="role-admin" value="Admin" formControlName="role">
+          <label for="role-admin" class="segment-label">
+            <span class="label-icon">🛡️</span> Admin
+          </label>
+          
+          <div class="segmented-control-indicator"></div>
+        </div>
+      </div>
+
+      <!-- User ID Input -->
+      <div class="form-group">
+        <label for="userId" class="form-label">User ID / Username</label>
+        <div class="input-container" [ngClass]="{ 'input-error': submitted && f['userId'].errors }">
+          <span class="input-icon">👤</span>
+          <input 
+            type="text" 
+            id="userId" 
+            formControlName="userId" 
+            class="form-control" 
+            placeholder="e.g. harsh_thakur"
+            autocomplete="username"
+            [disabled]="loading"
+          >
+        </div>
+        <div *ngIf="submitted && f['userId'].errors" class="validation-message">
+          <span *ngIf="f['userId'].errors['required']">User ID is required.</span>
+          <span *ngIf="f['userId'].errors['minlength']">Must be at least 3 characters.</span>
+        </div>
+      </div>
+
+      <!-- Password Input -->
+      <div class="form-group">
+        <label for="password" class="form-label">Password</label>
+        <div class="input-container" [ngClass]="{ 'input-error': submitted && f['password'].errors }">
+          <span class="input-icon">🔒</span>
+          <input 
+            type="password" 
+            id="password" 
+            formControlName="password" 
+            class="form-control" 
+            placeholder="••••••••"
+            autocomplete="current-password"
+            [disabled]="loading"
+          >
+        </div>
+        <div *ngIf="submitted && f['password'].errors" class="validation-message">
+          <span *ngIf="f['password'].errors['required']">Password is required.</span>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" class="btn btn-primary btn-block btn-login" [disabled]="loading">
+        <span *ngIf="!loading">Authenticate & Access Portal</span>
+        <span *ngIf="loading" class="btn-spinner-content">
+          <span class="inline-spinner"></span> Securely Verifying...
+        </span>
+      </button>
+
+      <!-- Seeding Credentials helper for the reviewer -->
+      <div class="reviewer-helper">
+        <details>
+          <summary>💡 Seed Credentials for Evaluators</summary>
+          <div class="helper-content">
+            <p><strong>Admin:</strong> admin123 / admin&#64;123</p>
+            <p><strong>General User:</strong> harsh_thakur / harsh&#64;123</p>
+            <p><strong>General User 2:</strong> user123 / user&#64;123</p>
+          </div>
+        </details>
+      </div>
+
+    </form>
+  </div>
+</div>

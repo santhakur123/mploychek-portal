@@ -1,0 +1,252 @@
+<div class="dashboard-wrapper">
+  <!-- Top Navigation Bar -->
+  <nav class="nav-bar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <span class="logo-text">MP</span><span class="logo-check">✓</span>
+        <span class="brand-text">MPloyChek</span>
+      </div>
+      <div class="nav-links">
+        <a routerLink="/dashboard" class="nav-link active">📊 Dashboard</a>
+        <a *ngIf="isAdmin" routerLink="/admin-panel" class="nav-link">🛡️ Admin Panel</a>
+      </div>
+      <div class="nav-user-area" *ngIf="currentUser">
+        <span class="user-pill">
+          <span class="role-badge" [ngClass]="currentUser.role === 'Admin' ? 'role-admin' : 'role-user'">
+            {{ currentUser.role }}
+          </span>
+          <span class="user-name">{{ currentUser.name }}</span>
+        </span>
+        <button (click)="logout()" class="btn-logout" title="Log Out">↩ Log Out</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+    <div class="content-header">
+      <div>
+        <h2 class="page-title">Digital Background Verification cases</h2>
+        <p class="page-subtitle">Real-time status overview of candidate verification audits</p>
+      </div>
+      <div class="action-buttons">
+        <button class="btn btn-secondary mr-10" (click)="loadRecords()">
+          🔄 Refresh
+        </button>
+        <button class="btn btn-primary" (click)="showAddModal = true">
+          ➕ Request New Check
+        </button>
+      </div>
+    </div>
+
+    <!-- Alert banners -->
+    <div class="alert alert-success" *ngIf="successMessage">
+      <div class="alert-icon">✓</div>
+      <div class="alert-content">{{ successMessage }}</div>
+    </div>
+    <div class="alert alert-danger" *ngIf="errorMessage">
+      <div class="alert-icon">⚠</div>
+      <div class="alert-content">{{ errorMessage }}</div>
+    </div>
+
+    <!-- Layout Grid -->
+    <div class="dashboard-grid">
+      <!-- User Profile Card -->
+      <section class="info-card user-profile-card">
+        <div class="card-header">
+          <h3>Logged In Profile Details</h3>
+        </div>
+        <div class="card-body" *ngIf="currentUser">
+          <div class="profile-details-list">
+            <div class="profile-item">
+              <span class="profile-label">Authorized Name</span>
+              <span class="profile-value">{{ currentUser.name }}</span>
+            </div>
+            <div class="profile-item">
+              <span class="profile-label">System User ID</span>
+              <span class="profile-value font-mono">{{ currentUser.id }}</span>
+            </div>
+            <div class="profile-item">
+              <span class="profile-label">User Email Address</span>
+              <span class="profile-value">{{ currentUser.email }}</span>
+            </div>
+            <div class="profile-item">
+              <span class="profile-label">Access Clearance Level</span>
+              <span class="profile-value">
+                <span class="badge" [ngClass]="currentUser.role === 'Admin' ? 'badge-admin' : 'badge-user'">
+                  {{ currentUser.role === 'Admin' ? 'FULL ADMINISTRATOR ACCESS' : 'RESTRICTED USER VIEW' }}
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Access Information Info Card -->
+      <section class="info-card help-card">
+        <div class="card-header">
+          <h3>Portal Verification Summary</h3>
+        </div>
+        <div class="card-body">
+          <p class="summary-text" *ngIf="!isAdmin">
+            You are logged in under a <strong>General User</strong> role. The system dynamically filters the database, presenting only cases associated with your specific User ID (<strong>{{ currentUser?.id }}</strong>).
+          </p>
+          <p class="summary-text" *ngIf="isAdmin">
+            You are logged in with the <strong>Admin</strong> role. You have permissions to query and inspect all background checks globally in the organization database, and manage system users under the Admin Panel.
+          </p>
+          <div class="quick-stats">
+            <div class="stat-box">
+              <span class="stat-num">{{ records.length }}</span>
+              <span class="stat-lbl">Assigned Cases</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-num text-success">
+                {{ getCountByStatus('Verified') }}
+              </span>
+              <span class="stat-lbl">Verified</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-num text-danger">
+                {{ getCountByStatus('Flagged') }}
+              </span>
+              <span class="stat-lbl">Flagged</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Verification Checks Table Section -->
+    <section class="records-section">
+      <div class="records-header">
+        <h3>Verification Audit Registry</h3>
+        <span class="tag-counter">{{ records.length }} total cases</span>
+      </div>
+
+      <!-- Skeleton Loader Table while loading -->
+      <div *ngIf="loadingRecords" class="table-container">
+        <app-skeleton-loader type="table" [count]="4"></app-skeleton-loader>
+      </div>
+
+      <!-- Records Table when loaded -->
+      <div *ngIf="!loadingRecords" class="table-container fade-in">
+        <table class="data-table" *ngIf="records.length > 0">
+          <thead>
+            <tr>
+              <th>Case ID</th>
+              <th>Candidate Name</th>
+              <th>Verification Type</th>
+              <th>Submitted Date</th>
+              <th>Risk Assessment</th>
+              <th>Status</th>
+              <th>Notes / Findings</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let record of records">
+              <td class="font-mono text-primary font-bold">{{ record.id }}</td>
+              <td>
+                <div class="candidate-cell">
+                  <div class="candidate-avatar">
+                    {{ record.candidateName.charAt(0) }}
+                  </div>
+                  <span class="candidate-name">{{ record.candidateName }}</span>
+                </div>
+              </td>
+              <td>{{ record.type }}</td>
+              <td>{{ record.submittedDate }}</td>
+              <td>
+                <span class="risk-indicator" [ngClass]="'risk-' + record.riskLevel.toLowerCase()">
+                  ● {{ record.riskLevel }} Risk
+                </span>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="'badge-' + record.status.toLowerCase().replace(' ', '-')">
+                  {{ record.status }}
+                </span>
+              </td>
+              <td class="notes-cell" [title]="record.notes">{{ record.notes }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Empty State -->
+        <div class="empty-state" *ngIf="records.length === 0">
+          <div class="empty-icon">📁</div>
+          <h4>No Verification Records Registered</h4>
+          <p>There are currently no active verification checks in the system database for your profile.</p>
+          <button class="btn btn-secondary mt-15" (click)="showAddModal = true">
+            Request First Check
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Add New Record Modal Overlay -->
+  <div class="modal-overlay" *ngIf="showAddModal" aria-modal="true" role="dialog">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Request Background Verification</h3>
+        <button class="modal-close" (click)="showAddModal = false">✕</button>
+      </div>
+      <form [formGroup]="newRecordForm" (ngSubmit)="onSubmitRecord()">
+        <div class="modal-body">
+          
+          <div class="form-group">
+            <label for="candidateName" class="form-label">Candidate Full Name</label>
+            <div class="input-container">
+              <input 
+                type="text" 
+                id="candidateName" 
+                formControlName="candidateName" 
+                class="form-control text-padding-left" 
+                placeholder="e.g. Rahul Sharma"
+              >
+            </div>
+            <div *ngIf="newRecordForm.get('candidateName')?.touched && newRecordForm.get('candidateName')?.invalid" class="validation-message">
+              Candidate name is required (min 2 characters).
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="type" class="form-label">Verification Audit Type</label>
+            <select id="type" formControlName="type" class="form-select">
+              <option *ngFor="let type of verificationTypes" [value]="type">{{ type }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="riskLevel" class="form-label">Initial Risk Estimate</label>
+            <select id="riskLevel" formControlName="riskLevel" class="form-select">
+              <option *ngFor="let r of riskLevels" [value]="r">{{ r }} Risk</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="notes" class="form-label">Audit Notes & context (Optional)</label>
+            <textarea 
+              id="notes" 
+              formControlName="notes" 
+              class="form-textarea" 
+              placeholder="Provide background references, candidate ID link or specific details..."
+              rows="3"
+            ></textarea>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="showAddModal = false" [disabled]="submittingRecord">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="newRecordForm.invalid || submittingRecord">
+            <span *ngIf="!submittingRecord">Submit Case Request</span>
+            <span *ngIf="submittingRecord" class="btn-spinner-content">
+              <span class="inline-spinner"></span> Creating Request...
+            </span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

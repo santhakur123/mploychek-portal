@@ -1,0 +1,23 @@
+<div class="spinner-overlay" *ngIf="loadingService.loading$ | async">
+  <div class="spinner-container">
+    <div class="spinner-logo-area">
+      <div class="double-spin">
+        <div class="ring outer-ring"></div>
+        <div class="ring middle-ring"></div>
+        <div class="ring inner-ring"></div>
+      </div>
+      <div class="spinner-brand">
+        <span class="brand-mp">MP</span><span class="brand-check">✓</span>
+      </div>
+    </div>
+    <div class="spinner-status">
+      <h3>Synchronizing Data</h3>
+      <div class="loading-dots">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+    <p class="spinner-subtext">Retrieving secure verification credentials...</p>
+  </div>
+</div>

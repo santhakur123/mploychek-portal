@@ -1,0 +1,38 @@
+<div class="skeleton-wrapper" [ngClass]="type">
+  <!-- Table Skeleton -->
+  <div *ngIf="type === 'table'" class="skeleton-table">
+    <div class="skeleton-th flex-row">
+      <div class="skeleton-td w-15 h-20 pulse"></div>
+      <div class="skeleton-td w-25 h-20 pulse"></div>
+      <div class="skeleton-td w-20 h-20 pulse"></div>
+      <div class="skeleton-td w-15 h-20 pulse"></div>
+      <div class="skeleton-td w-25 h-20 pulse"></div>
+    </div>
+    <div *ngFor="let item of getItems()" class="skeleton-tr flex-row">
+      <div class="skeleton-td w-15 h-16 pulse"></div>
+      <div class="skeleton-td w-25 h-16 pulse"></div>
+      <div class="skeleton-td w-20 h-16 pulse"></div>
+      <div class="skeleton-td w-15 h-16 pulse"></div>
+      <div class="skeleton-td w-25 h-16 pulse"></div>
+    </div>
+  </div>
+
+  <!-- Profile Skeleton -->
+  <div *ngIf="type === 'profile'" class="skeleton-profile flex-row pulse">
+    <div class="skeleton-avatar pulse"></div>
+    <div class="skeleton-profile-info">
+      <div class="skeleton-line w-40 h-24 pulse mb-10"></div>
+      <div class="skeleton-line w-60 h-16 pulse mb-8"></div>
+      <div class="skeleton-line w-25 h-16 pulse"></div>
+    </div>
+  </div>
+
+  <!-- Card Skeleton -->
+  <div *ngIf="type === 'card'" class="skeleton-grid">
+    <div *ngFor="let item of getItems()" class="skeleton-card pulse">
+      <div class="skeleton-line w-30 h-16 pulse mb-15"></div>
+      <div class="skeleton-line w-85 h-30 pulse mb-20"></div>
+      <div class="skeleton-line w-50 h-16 pulse"></div>
+    </div>
+  </div>
+</div>

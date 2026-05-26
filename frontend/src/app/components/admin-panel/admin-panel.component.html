@@ -1,0 +1,225 @@
+<div class="admin-wrapper">
+  <!-- Top Navigation Bar -->
+  <nav class="nav-bar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <span class="logo-text">MP</span><span class="logo-check">✓</span>
+        <span class="brand-text">MPloyChek</span>
+      </div>
+      <div class="nav-links">
+        <a routerLink="/dashboard" class="nav-link">📊 Dashboard</a>
+        <a routerLink="/admin-panel" class="nav-link active">🛡️ Admin Panel</a>
+      </div>
+      <div class="nav-user-area" *ngIf="currentUser">
+        <span class="user-pill">
+          <span class="role-badge role-admin">{{ currentUser.role }}</span>
+          <span class="user-name">{{ currentUser.name }}</span>
+        </span>
+        <button (click)="logout()" class="btn-logout" title="Log Out">↩ Log Out</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+    <div class="content-header">
+      <div>
+        <h2 class="page-title">Authorized User Database</h2>
+        <p class="page-subtitle">Add, update, or revoke access permissions for verification agents</p>
+      </div>
+      <div class="action-buttons">
+        <button class="btn btn-secondary mr-10" (click)="loadUsers()">
+          🔄 Refresh
+        </button>
+        <button class="btn btn-primary" (click)="openAddModal()">
+          ➕ Add New System User
+        </button>
+      </div>
+    </div>
+
+    <!-- Feedback Alerts -->
+    <div class="alert alert-success" *ngIf="successMessage">
+      <div class="alert-icon">✓</div>
+      <div class="alert-content">{{ successMessage }}</div>
+    </div>
+    <div class="alert alert-danger" *ngIf="errorMessage">
+      <div class="alert-icon">⚠</div>
+      <div class="alert-content">{{ errorMessage }}</div>
+    </div>
+
+    <!-- Users Table Section -->
+    <section class="users-section">
+      <div class="users-header">
+        <h3>Registered System Users</h3>
+        <span class="tag-counter">{{ users.length }} active accounts</span>
+      </div>
+
+      <!-- Skeleton Table Loader -->
+      <div *ngIf="loadingUsers" class="table-container">
+        <app-skeleton-loader type="table" [count]="4"></app-skeleton-loader>
+      </div>
+
+      <!-- User List Table -->
+      <div *ngIf="!loadingUsers" class="table-container fade-in">
+        <table class="data-table" *ngIf="users.length > 0">
+          <thead>
+            <tr>
+              <th>User ID (Key)</th>
+              <th>Full Name</th>
+              <th>Email Address</th>
+              <th>Access Role</th>
+              <th>Registration Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of users">
+              <td class="font-mono text-primary font-bold">{{ user.id }}</td>
+              <td>
+                <div class="user-cell">
+                  <div class="user-avatar" [ngClass]="user.role === 'Admin' ? 'avatar-admin' : 'avatar-user'">
+                    {{ user.name.charAt(0) }}
+                  </div>
+                  <span class="user-full-name">{{ user.name }}</span>
+                </div>
+              </td>
+              <td>{{ user.email }}</td>
+              <td>
+                <span class="badge" [ngClass]="user.role === 'Admin' ? 'badge-admin' : 'badge-user'">
+                  {{ user.role }}
+                </span>
+              </td>
+              <td>{{ user.createdAt | date:'mediumDate' }}</td>
+              <td>
+                <div class="action-cell">
+                  <button class="btn btn-sm btn-edit mr-8" (click)="openEditModal(user)" title="Edit User">
+                    ✏️ Edit
+                  </button>
+                  <button 
+                    class="btn btn-sm btn-delete" 
+                    (click)="deleteUser(user)" 
+                    [disabled]="user.id === currentUser?.id"
+                    [title]="user.id === currentUser?.id ? 'Cannot delete your active admin session' : 'Delete User'"
+                  >
+                    🗑️ Delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Empty DB State -->
+        <div class="empty-state" *ngIf="users.length === 0">
+          <div class="empty-icon">👥</div>
+          <h4>No Registered Users Found</h4>
+          <p>No user accounts have been initialized in the local database registry.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Add/Edit User Modal Overlay -->
+  <div class="modal-overlay" *ngIf="showModal" aria-modal="true" role="dialog">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>{{ isEditMode ? 'Edit User Credentials' : 'Register New System User' }}</h3>
+        <button class="modal-close" (click)="showModal = false">✕</button>
+      </div>
+      <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+        <div class="modal-body">
+          
+          <!-- Username (Unique ID) -->
+          <div class="form-group">
+            <label for="username" class="form-label">User ID / Username</label>
+            <div class="input-container">
+              <input 
+                type="text" 
+                id="username" 
+                formControlName="username" 
+                class="form-control text-padding-left" 
+                placeholder="e.g. harsh_thakur"
+              >
+            </div>
+            <div *ngIf="userForm.get('username')?.touched && userForm.get('username')?.invalid" class="validation-message">
+              Username is required (min 3 characters).
+            </div>
+          </div>
+
+          <!-- Name -->
+          <div class="form-group">
+            <label for="name" class="form-label">Full Name</label>
+            <div class="input-container">
+              <input 
+                type="text" 
+                id="name" 
+                formControlName="name" 
+                class="form-control text-padding-left" 
+                placeholder="e.g. Harsh Thakur"
+              >
+            </div>
+            <div *ngIf="userForm.get('name')?.touched && userForm.get('name')?.invalid" class="validation-message">
+              Full Name is required (min 2 characters).
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="form-group">
+            <label for="email" class="form-label">Email Address</label>
+            <div class="input-container">
+              <input 
+                type="email" 
+                id="email" 
+                formControlName="email" 
+                class="form-control text-padding-left" 
+                placeholder="harsh.thakur@company.com"
+              >
+            </div>
+            <div *ngIf="userForm.get('email')?.touched && userForm.get('email')?.invalid" class="validation-message">
+              Please enter a valid email address.
+            </div>
+          </div>
+
+          <!-- Role -->
+          <div class="form-group">
+            <label for="role" class="form-label">Access Clearance Role</label>
+            <select id="role" formControlName="role" class="form-select">
+              <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
+            </select>
+          </div>
+
+          <!-- Password -->
+          <div class="form-group">
+            <label for="password" class="form-label">
+              Password {{ isEditMode ? '(Leave blank to keep unchanged)' : '' }}
+            </label>
+            <div class="input-container">
+              <input 
+                type="password" 
+                id="password" 
+                formControlName="password" 
+                class="form-control text-padding-left" 
+                placeholder="••••••••"
+              >
+            </div>
+            <div *ngIf="userForm.get('password')?.touched && userForm.get('password')?.invalid" class="validation-message">
+              Password is required (min 6 characters).
+            </div>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="showModal = false" [disabled]="submitting">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="userForm.invalid || submitting">
+            <span *ngIf="!submitting">{{ isEditMode ? 'Update User Account' : 'Create User Account' }}</span>
+            <span *ngIf="submitting" class="btn-spinner-content">
+              <span class="inline-spinner"></span> Saving Changes...
+            </span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
